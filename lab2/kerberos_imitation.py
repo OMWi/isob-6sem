@@ -1,10 +1,11 @@
-from re import A
 from time import sleep
 from des import encrypt, decrypt
 from datetime import datetime
 
+
 def now_int():
     return int(round(datetime.now().timestamp()))
+
 
 def main():
     C = {
@@ -43,7 +44,8 @@ def main():
     for key in TGT:
         TGT[key] = encrypt(TGT[key], AS["Kas_tgs"])
         TGT[key] = encrypt(TGT[key], AS["Kc"])
-    message_as_to_c = {"TGT_enc": TGT, "Kc_tgs": encrypt(AS["Kc_tgs"], AS["Kc"])}
+    message_as_to_c = {"TGT_enc": TGT,
+                       "Kc_tgs": encrypt(AS["Kc_tgs"], AS["Kc"])}
 
     # client received message
     C["TGT_as_tgs"] = message_as_to_c["TGT_enc"]
@@ -59,7 +61,8 @@ def main():
     }
     for key in aut1:
         aut1[key] = encrypt(aut1[key], C["Kc_tgs"])
-    message_c_to_tgs = {"TGT_as_tgs": C["TGT_as_tgs"], "Aut1_c_tgs": aut1, "service_id": C["ss_id"]}
+    message_c_to_tgs = {
+        "TGT_as_tgs": C["TGT_as_tgs"], "Aut1_c_tgs": aut1, "service_id": C["ss_id"]}
 
     # tgs received message
     TGS["TGT"] = message_c_to_tgs["TGT_as_tgs"]
@@ -68,7 +71,7 @@ def main():
     TGS["Aut1"] = message_c_to_tgs["Aut1_c_tgs"]
     for key in TGS["Aut1"]:
         TGS["Aut1"][key] = decrypt(TGS["Aut1"][key], TGS["TGT"]["Kc_tgs"])
-    
+
     if TGS["Aut1"]["c"] != TGS["TGT"]["c"]:
         print("aut1 id != tgt id")
         return
@@ -97,7 +100,7 @@ def main():
     C["TGS"] = message_tgs_to_c["TGS_tgs_ss"]
     for key in C["TGS"]:
         C["TGS"][key] = decrypt(C["TGS"][key], C["Kc_tgs"])
-    C["Kc_ss"] = decrypt(message_tgs_to_c["Kc_ss"], C["Kc_tgs"])    
+    C["Kc_ss"] = decrypt(message_tgs_to_c["Kc_ss"], C["Kc_tgs"])
 
     # step 5
     print(r"5. C -> SS: {TGS}K(tgs_ss), {Aut2}K(c_ss)")
@@ -126,7 +129,7 @@ def main():
         return
     if SS["Aut2"]["t4"] - SS["TGS"]["t3"] > SS["TGS"]["p2"]:
         print("tgs expired")
-        return    
+        return
 
     # step 6
     print(r"6. SS -> C: {t4+1}K(c_ss)")
@@ -139,9 +142,8 @@ def main():
     if time_from_message != C["t"] + 1:
         print(r"c[t] != ss[t]")
         return
-    
-    print("access granted")
 
+    print("access granted")
 
 
 if __name__ == "__main__":
