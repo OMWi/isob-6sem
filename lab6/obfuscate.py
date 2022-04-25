@@ -1,8 +1,8 @@
 import os
 
 def main():
-    script_name = input("Enter code file name: ")
-    command = f"pyarmor obfuscate {script_name}"
+    folder = input("Enter project folder name: ")
+    command = f"pyarmor obfuscate {folder}/"
     os.system(f'cmd /c "{command}"')
 
 if __name__ == "__main__":
