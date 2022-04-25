@@ -1,7 +1,7 @@
 import os
 
 def main():
-    script_name = "app.py"
+    script_name = input("Enter code file name: ")
     command = f"pyarmor obfuscate {script_name}"
     os.system(f'cmd /c "{command}"')
 
