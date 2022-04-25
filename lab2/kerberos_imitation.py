@@ -1,10 +1,15 @@
 from time import sleep
 from des import encrypt, decrypt
 from datetime import datetime
+import json
 
 
 def now_int():
     return int(round(datetime.now().timestamp()))
+
+def print_dict(name, data):
+    json_data = json.dumps(data, indent=2)
+    print(f"{name} data: {json_data}")
 
 
 def main():
@@ -29,10 +34,16 @@ def main():
         "Ktgs_ss": 823,
         "Kc_ss": 81724
     }
+    print("Initial data:")
+    print_dict("C", C)
+    print_dict("AS", AS)
+    print_dict("TGS", TGS)
+    print_dict("SS", SS)
 
     # step 1
     print(r"1. C -> AS: {c}")
     AS["client_id"] = C["id"]
+    print("received: C -> AS")
 
     # step 2
     print(r"2. AS -> C: {{TGT}K(as_tgs), K(c_tgs)}K(c)")
@@ -52,6 +63,7 @@ def main():
     for key in C["TGT_as_tgs"]:
         C["TGT_as_tgs"][key] = decrypt(C["TGT_as_tgs"][key], C["Kc"])
     C["Kc_tgs"] = decrypt(message_as_to_c["Kc_tgs"], C["Kc"])
+    print("received: AS -> C")
 
     # step 3
     print(r"3. C -> TGS: {TGT}K(as_tgs), {Aut1}K(c_tgs), {ID}")
@@ -71,13 +83,16 @@ def main():
     TGS["Aut1"] = message_c_to_tgs["Aut1_c_tgs"]
     for key in TGS["Aut1"]:
         TGS["Aut1"][key] = decrypt(TGS["Aut1"][key], TGS["TGT"]["Kc_tgs"])
+    print("received: C -> TGS")
 
     if TGS["Aut1"]["c"] != TGS["TGT"]["c"]:
         print("aut1 id != tgt id")
         return
+    print("passed: aut1 c_id == tgt c_id ")
     if TGS["Aut1"]["t2"] - TGS["TGT"]["t1"] > TGS["TGT"]["p1"]:
         print("tgt expired")
         return
+    print("passed: tgt not expired")
 
     # step 4
     print(r"4. TGS -> C: {{TGS}K(tgs_ss), K(c_ss)}K(c_tgs)")
@@ -101,6 +116,7 @@ def main():
     for key in C["TGS"]:
         C["TGS"][key] = decrypt(C["TGS"][key], C["Kc_tgs"])
     C["Kc_ss"] = decrypt(message_tgs_to_c["Kc_ss"], C["Kc_tgs"])
+    print("received: TGS -> C")
 
     # step 5
     print(r"5. C -> SS: {TGS}K(tgs_ss), {Aut2}K(c_ss)")
@@ -123,13 +139,16 @@ def main():
     SS["Aut2"] = message_c_to_ss["Aut2"]
     for key in SS["Aut2"]:
         SS["Aut2"][key] = decrypt(SS["Aut2"][key], SS["Kc_ss"])
+    print("received: C -> SS")
 
     if SS["TGS"]["c"] != SS["Aut2"]["c"]:
         print("aut2 id != tgs id")
         return
+    print("passed: aut2 c_id == tgs c_id")
     if SS["Aut2"]["t4"] - SS["TGS"]["t3"] > SS["TGS"]["p2"]:
         print("tgs expired")
         return
+    print("passed: tgs not expired")
 
     # step 6
     print(r"6. SS -> C: {t4+1}K(c_ss)")
@@ -139,9 +158,11 @@ def main():
 
     # client receved message
     time_from_message = decrypt(message_ss_to_c["t"], C["Kc_ss"])
+    print("received: SS -> C")
     if time_from_message != C["t"] + 1:
-        print(r"c[t] != ss[t]")
+        print("c[t] != ss[t]")
         return
+    print("passed: c[t] == ss[t]-1")
 
     print("access granted")
 
