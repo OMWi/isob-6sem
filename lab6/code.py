@@ -5,59 +5,6 @@ import mysql.connector
 from datetime import datetime
 
 class MainWindow:
-
-    # isob
-    def filter_input(self, str: str):
-        # return str
-        str = str.replace("''", "")
-        str = str.replace("--", "")
-        str = str.replace("/*", "")
-        str = str.replace("*/", "")
-        str = str.replace("@", "")
-        str = str.replace("@@", "")
-        str = str.replace("char", "")
-        str = str.replace("nchar", "")
-        str = str.replace("varchar", "")
-        str = str.replace("nvarchar", "")
-
-        str = str.replace("select", "")
-        str = str.replace("insert", "")
-        str = str.replace("update", "")
-        str = str.replace("delete", "")
-        str = str.replace("from", "")
-        str = str.replace("table", "")
-
-        str = str.replace("drop", "")
-        str = str.replace("create", "")
-        str = str.replace("alter", "")
-
-        str = str.replace("begin", "")
-        str = str.replace("end", "")
-
-        str = str.replace("grant", "")
-        str = str.replace("deny", "")
-
-        str = str.replace("exec", "")
-        str = str.replace("sp_", "")
-        str = str.replace("xp_", "")
-
-        str = str.replace("cursor", "")
-        str = str.replace("fetch", "")
-        str = str.replace("kill", "")
-        str = str.replace("open", "")
-        str = str.replace("sysobjects", "")
-        str = str.replace("syscolumns", "")
-        str = str.replace("sys", "")
-
-        str = str.replace("%", "")
-        str = str.replace("<", "")
-        str = str.replace(">", "")
-        str = str.replace("&", "")
-        str = str.replace(";", "")
-        str = str.replace("#", "")
-
-        return str
-
     def __init__(self, root, cnx) -> None:
         self.cnx = cnx
         self.root = root
@@ -129,7 +76,7 @@ class MainWindow:
         info = Text(toolframe, width=50, height=15, state="disabled")
         info.grid(column=0, columnspan=2, row=6, sticky=(W, E))
 
-        def on_combobox_select():
+        def on_combobox_selectdsfsa():
             table_name = tablebox.get()
             try:
                 cur = self.cnx.cursor()
@@ -239,7 +186,6 @@ class MainWindow:
             try:
                 cur = self.cnx.cursor()
                 content = review_text.get("1.0", END)
-                content = self.filter_input(content) # isob
                 args = [content[:1024], book_id] # isob
                 cur.callproc("add_review", args)
                 cur.execute("select last_insert_id()")
@@ -335,7 +281,7 @@ class MainWindow:
             
             try:
                 cur = self.cnx.cursor()
-                cur.callproc("get_user_name", [self.filter_input(namevar.get())]) # isob
+                cur.callproc("get_user_name", [namevar.get()]) # isob
                 user = None
                 for elem in cur.stored_results():
                     res = elem.fetchall()
@@ -413,14 +359,14 @@ class MainWindow:
 
             try:
                 cur = self.cnx.cursor()
-                cur.callproc("get_user_name", [self.filter_input(namevar.get())])
+                cur.callproc("get_user_name", [namevar.get()])
                 res = None
                 for elem in cur.stored_results():
                     res = elem.fetchall()
                     if len(res) > 0:
                         info["text"] = "Username already taken. Choose another"
                         raise ValueError("Username taken")
-                args = [self.filter_input(namevar.get()), passwordvar.get(), "user"]
+                args = [namevar.get(), passwordvar.get(), "user"]
                 cur.callproc("add_user", args)                
                 self.cnx.commit()
                 cur.execute("select last_insert_id()")
@@ -512,7 +458,7 @@ class MainWindow:
                     info["text"] = f"Password too short"
                     return
             try:
-                args = [self.filter_input(elem.get()) for elem in entry_var]
+                args = [elem.get() for elem in entry_var]
                 cur = self.cnx.cursor()
                 cur.callproc(f"add_{table_name}", args)
                 log = f"admin id:{self.user.id} insert: "
@@ -573,7 +519,7 @@ class MainWindow:
                     info["text"] = f"Password too short"
                     return
             try:
-                args = [self.filter_input(elem.get()) for elem in entry_var]
+                args = [elem.get() for elem in entry_var]
                 cur = self.cnx.cursor()
                 cur.callproc(f"update_{table_name}", args)
                 log = f"admin id:{self.user.id} update: "
